@@ -1,0 +1,9 @@
+.env
+.vercel
+node_modules
+.DS_Store
+
+# Full ensemble ONNX exports are too large for GitHub/Vercel.
+public/models/*.onnx
+public/models/*.onnx.data
+!public/models/mobilenet.web.onnx

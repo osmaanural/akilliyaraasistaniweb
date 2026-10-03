@@ -1,0 +1,22 @@
+{
+  "mode": "browser-onnx",
+  "active_model": "mobilenet",
+  "note": "Vercel/web surumunde hizli acilis icin MobileNet ONNX kullanilir. Full ensemble dosyalari yerel test icindir.",
+  "input": {
+    "shape": [1, 3, 224, 224],
+    "format": "RGB",
+    "normalization": {
+      "mean": [0.485, 0.456, 0.406],
+      "std": [0.229, 0.224, 0.225]
+    }
+  },
+  "classes": ["Evre 1", "Evre 2", "Evre 3", "Evre 4"],
+  "models": [
+    {
+      "name": "mobilenet",
+      "path": "/models/mobilenet.web.onnx",
+      "size_mb": 11.18,
+      "max_abs_diff": 1.8756836652755737e-06
+    }
+  ]
+}

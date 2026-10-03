@@ -1,0 +1,16 @@
+{
+  "name": "akilliyaraasistani",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev",
+    "deploy": "vercel",
+    "local": "node local-server.mjs"
+  },
+  "devDependencies": {
+    "vercel": "^48.0.0"
+  },
+  "description": "Akıllı Yara Asistanı - OpenRouter destekli yara bakım web prototipi"
+}

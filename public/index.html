@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Akıllı Yara Asistanı</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="AYA">
+      <span class="brand-mark">A</span>
+      <span>
+        <strong>Akıllı Yara Asistanı</strong>
+        <small>Yara Bakım Destek Sistemi</small>
+      </span>
+    </a>
+    <nav>
+      <a href="#degerlendirme">Değerlendirme</a>
+      <a href="#bakim">Bakım Önerisi</a>
+      <a href="#rehber">Rehber</a>
+    </nav>
+    <span class="status">Hazır</span>
+  </header>
+
+  <main id="top">
+    <section class="notice">
+      <strong>Bilgilendirme Notu:</strong>
+      Akıllı Yara Asistanı, yara görüntüsü ve girilen bilgiler doğrultusunda ön değerlendirme ve genel bakım önerileri sunan bir destek aracıdır.
+      Tanı koymaz, tedavi belirlemez ve sağlık profesyonelinin değerlendirmesinin yerine geçmez.
+    </section>
+
+    <section class="hero">
+      <p class="eyebrow">Klinik karar destek prototipi</p>
+      <h1>Yara değerlendirmesini daha düzenli, hızlı ve anlaşılır hale getirin.</h1>
+      <p>
+        Görüntü, yara bulguları, kural tabanı ve rehber bilgisini bir araya getirerek bakım önceliklerini görünür kılar.
+      </p>
+    </section>
+
+    <section class="workspace" id="degerlendirme">
+      <article class="panel image-panel">
+        <div class="panel-head">
+          <span class="step">1</span>
+          <div>
+          <h2>Yara Fotoğrafı</h2>
+            <p>Görüntüyü yükleyin, model tahmini alın veya evreyi manuel seçin.</p>
+          </div>
+        </div>
+        <label class="dropzone" for="imageInput">
+          <input id="imageInput" type="file" accept="image/*">
+          <img id="preview" alt="">
+          <span id="dropText">Görüntü yükle</span>
+        </label>
+        <button id="predictBtn" class="secondary" type="button">Görüntüden Evre Tahmin Et</button>
+        <div id="modelResult" class="model-result">
+          <strong>Model durumu</strong>
+          <span>Görüntü yüklendiğinde ONNX modeli ile tahmin alınabilir.</span>
+        </div>
+        <div class="field">
+          <label for="stageSelect">Yara evresi</label>
+          <select id="stageSelect">
+            <option value="0">Evre 1</option>
+            <option value="1" selected>Evre 2</option>
+            <option value="2">Evre 3</option>
+            <option value="3">Evre 4</option>
+          </select>
+        </div>
+        <p class="subtle">
+          Web sürümünde hızlı açılış için hafif CNN modeli kullanılır. Gerekirse evre seçimini sağlık profesyoneli manuel düzeltebilir.
+        </p>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <span class="step">2</span>
+          <div>
+            <h2>Yara Bilgileri</h2>
+            <p>Bakım önerisini netleştirmek için bulguları girin.</p>
+          </div>
+        </div>
+
+        <details class="terms" open>
+          <summary>Yara bilgileri ne anlama gelir?</summary>
+          <div class="term-grid">
+            <div><strong>Granülasyon</strong><span>Kırmızı-pembe sağlıklı iyileşme dokusu.</span></div>
+            <div><strong>Slough</strong><span>Sarımsı, yumuşak, iyileşmeyi yavaşlatabilen doku.</span></div>
+            <div><strong>Nekroz</strong><span>Siyah/kahverengi cansız doku görünümü.</span></div>
+            <div><strong>Eksüda</strong><span>Yaradan gelen sıvı/akıntı.</span></div>
+          </div>
+        </details>
+
+        <div class="form-grid">
+          <label>Yara bölgesi<input id="lokasyon" placeholder="sakrum, topuk..."></label>
+          <label>Doku görünümü<select id="doku">
+            <option>intakt cilt</option><option>epitel doku</option><option selected>granülasyon</option><option>slough</option><option>nekrotik doku</option><option>derin doku kaybı</option>
+          </select></label>
+          <label>Akıntı durumu<select id="eksuda"><option>yok</option><option>az</option><option>orta</option><option>fazla</option></select></label>
+          <label>Enfeksiyon şüphesi<select id="enfeksiyon"><option>yok</option><option>şüpheli</option><option>var</option></select></label>
+          <label>Kötü koku<select id="koku"><option>yok</option><option>var</option></select></label>
+          <label>Slough<select id="slough"><option>yok</option><option>var</option></select></label>
+          <label>Nekroz<select id="nekroz"><option>yok</option><option>var</option></select></label>
+          <label>Çevre kızarıklık<select id="kizariklik"><option>yok</option><option>var</option></select></label>
+          <label>Isı artışı<select id="isi_artisi"><option>yok</option><option>var</option></select></label>
+          <label>Ağrı<select id="agri"><option>yok</option><option>var</option></select></label>
+          <label>Ateş<select id="ates"><option>yok</option><option>var</option></select></label>
+          <label>Diyabet<select id="diyabet"><option>yok</option><option>var</option></select></label>
+          <label>Damar hastalığı<select id="damar_hastaligi"><option>yok</option><option>var</option></select></label>
+        </div>
+
+        <button id="planBtn" class="primary">Bakım Önerisi Oluştur</button>
+      </article>
+    </section>
+
+    <section class="results" id="bakim">
+      <article class="panel" id="planCard">
+        <p class="empty">Bakım önerisi burada görüntülenecek.</p>
+      </article>
+      <article class="panel" id="guideCard">
+        <p class="empty">Rehber özeti burada görüntülenecek.</p>
+      </article>
+    </section>
+
+    <section class="panel sources" id="rehber">
+      <h2>Rehberden Kısa Notlar</h2>
+      <div id="sourceList" class="source-list"></div>
+    </section>
+
+    <section class="chat panel">
+      <div>
+        <h2>Asistana Soru Sor</h2>
+        <p>Bakım önerisi hakkında kısa bir soru yazın.</p>
+      </div>
+      <div id="chatLog" class="chat-log"></div>
+      <div class="chat-row">
+        <input id="questionInput" placeholder="Örn. Antibiyotik gerekli mi?">
+        <button id="chatBtn" type="button">Sor</button>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
