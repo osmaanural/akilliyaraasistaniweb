@@ -7,13 +7,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="./styles.css">
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="#top" aria-label="AYA">
-      <span class="brand-mark">A</span>
+      <span class="brand-mark">AYA</span>
       <span>
         <strong>Akıllı Yara Asistanı</strong>
         <small>Yara Bakım Destek Sistemi</small>
@@ -23,23 +23,56 @@
       <a href="#degerlendirme">Değerlendirme</a>
       <a href="#bakim">Bakım Önerisi</a>
       <a href="#rehber">Rehber</a>
+      <a href="#iletisim">İletişim</a>
     </nav>
-    <span class="status">Hazır</span>
   </header>
 
   <main id="top">
     <section class="notice">
       <strong>Bilgilendirme Notu:</strong>
       Akıllı Yara Asistanı, yara görüntüsü ve girilen bilgiler doğrultusunda ön değerlendirme ve genel bakım önerileri sunan bir destek aracıdır.
-      Tanı koymaz, tedavi belirlemez ve sağlık profesyonelinin değerlendirmesinin yerine geçmez.
+      Tanı koymaz, tedavi belirlemez ve sağlık profesyonelinin değerlendirmesinin yerine geçmez. Şüpheli, ilerleyen veya enfeksiyon düşündüren durumlarda sağlık profesyoneli değerlendirmesi gereklidir.
     </section>
 
     <section class="hero">
-      <p class="eyebrow">Klinik karar destek prototipi</p>
-      <h1>Yara değerlendirmesini daha düzenli, hızlı ve anlaşılır hale getirin.</h1>
-      <p>
-        Görüntü, yara bulguları, kural tabanı ve rehber bilgisini bir araya getirerek bakım önceliklerini görünür kılar.
-      </p>
+      <div class="hero-copy">
+        <p class="eyebrow">Yara bakımında ön değerlendirme desteği</p>
+        <h1>Yara fotoğrafını ve bulguları tek ekranda anlamlandırın.</h1>
+        <p>
+          Akıllı Yara Asistanı, basınç yarası fotoğrafından evre tahmini alır; girilen klinik bulgularla birlikte bakım önceliklerini, takip ihtiyacını ve rehber notlarını düzenli bir çıktı haline getirir.
+        </p>
+        <div class="hero-actions" aria-label="Sistem özeti">
+          <span>Görüntü tahmini</span>
+          <span>Kural tabanlı bakım</span>
+          <span>Rehber destekli yanıt</span>
+        </div>
+      </div>
+      <aside class="hero-card" aria-label="Sistem akışı">
+        <div class="hero-card-top">
+          <span>AYA akışı</span>
+          <strong>3 adımda ön değerlendirme</strong>
+        </div>
+        <ol class="flow-list">
+          <li><span>01</span><strong>Fotoğrafı yükle</strong><small>Model yara evresi için ön tahmin üretir.</small></li>
+          <li><span>02</span><strong>Bulguları gir</strong><small>Eksüda, koku, nekroz, ağrı ve risk bulguları eklenir.</small></li>
+          <li><span>03</span><strong>Bakım planını incele</strong><small>Kural tabanı ve rehber notları birlikte sunulur.</small></li>
+        </ol>
+      </aside>
+    </section>
+
+    <section class="info-grid" aria-label="Klinik bilgilendirme">
+      <article>
+        <strong>Uzman değerlendirmesi önemlidir</strong>
+        <p>Bu ekran ön değerlendirme sunar. Evre, doku kaybı, enfeksiyon bulgusu ve pansuman seçimi klinik gözlemle birlikte değerlendirilmelidir.</p>
+      </article>
+      <article>
+        <strong>Acil dikkat gerektiren bulgular</strong>
+        <p>Ateş, kötü koku, hızla artan kızarıklık, yoğun akıntı, nekroz veya şiddetli ağrı varsa sağlık kuruluşuna başvurulmalıdır.</p>
+      </article>
+      <article>
+        <strong>Standart takip yaklaşımı</strong>
+        <p>Basıncı azaltma, cilt bütünlüğünü koruma, nem dengesini izleme ve düzenli kayıt tutma bakım sürecinin temel parçalarıdır.</p>
+      </article>
     </section>
 
     <section class="workspace" id="degerlendirme">
@@ -48,7 +81,7 @@
           <span class="step">1</span>
           <div>
           <h2>Yara Fotoğrafı</h2>
-            <p>Görüntüyü yükleyin, model tahmini alın veya evreyi manuel seçin.</p>
+            <p>Görüntüyü yükleyin ve model tahmini alın. Bakım önerisi tahmin edilen evreye göre hazırlanır.</p>
           </div>
         </div>
         <label class="dropzone" for="imageInput">
@@ -61,17 +94,9 @@
           <strong>Model durumu</strong>
           <span>Görüntü yüklendiğinde ONNX modeli ile tahmin alınabilir.</span>
         </div>
-        <div class="field">
-          <label for="stageSelect">Yara evresi</label>
-          <select id="stageSelect">
-            <option value="0">Evre 1</option>
-            <option value="1" selected>Evre 2</option>
-            <option value="2">Evre 3</option>
-            <option value="3">Evre 4</option>
-          </select>
-        </div>
+        <input id="stageSelect" type="hidden" value="">
         <p class="subtle">
-          Web sürümünde hızlı açılış için hafif CNN modeli kullanılır. Gerekirse evre seçimini sağlık profesyoneli manuel düzeltebilir.
+          Model sonucu tek başına klinik karar değildir. Uygunsuz görüntü, düşük güven skoru veya şüpheli bulgu varsa uzman değerlendirmesi esas alınmalıdır.
         </p>
       </article>
 
@@ -91,6 +116,8 @@
             <div><strong>Slough</strong><span>Sarımsı, yumuşak, iyileşmeyi yavaşlatabilen doku.</span></div>
             <div><strong>Nekroz</strong><span>Siyah/kahverengi cansız doku görünümü.</span></div>
             <div><strong>Eksüda</strong><span>Yaradan gelen sıvı/akıntı.</span></div>
+            <div><strong>Çevre kızarıklık</strong><span>Basınç, tahriş veya enfeksiyon açısından izlenmesi gereken bulgudur.</span></div>
+            <div><strong>Isı artışı</strong><span>Enflamasyon veya enfeksiyon şüphesini artırabilir.</span></div>
           </div>
         </details>
 
@@ -141,8 +168,18 @@
         <button id="chatBtn" type="button">Sor</button>
       </div>
     </section>
+
+    <section class="contact-card" id="iletisim" aria-label="İletişim">
+      <div>
+        <span>İletişim</span>
+        <strong>AYA hakkında soru ve geri bildirimleriniz için</strong>
+      </div>
+      <a href="https://www.instagram.com/akilliyaraasistani" target="_blank" rel="noopener noreferrer">
+        @akilliyaraasistani
+      </a>
+    </section>
   </main>
 
-  <script type="module" src="/app.js"></script>
+  <script type="module" src="./app.js"></script>
 </body>
 </html>

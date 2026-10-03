@@ -3,7 +3,7 @@ import { knowledgeBase } from "./data/knowledge.js";
 const $ = (id) => document.getElementById(id);
 const stages = ["Evre 1", "Evre 2", "Evre 3", "Evre 4"];
 const modelConfig = {
-  path: "/models/mobilenet.web.onnx",
+  path: "./models/mobilenet.web.onnx",
   inputSize: 224,
   mean: [0.485, 0.456, 0.406],
   std: [0.229, 0.224, 0.225]
@@ -15,7 +15,9 @@ const state = {
   answers: {},
   chatHistory: [],
   modelSession: null,
-  uploadedFile: null
+  uploadedFile: null,
+  predictedStageIndex: null,
+  predictionConfidence: null
 };
 
 function yes(value) {
@@ -174,7 +176,12 @@ async function predictStage() {
     const confidence = Math.round(probabilities[bestIndex] * 1000) / 10;
 
     $("stageSelect").value = String(bestIndex);
-    setModelResult(`${stages[bestIndex]} tahmini`, `Güven skoru: %${confidence}. Gerekirse evreyi manuel düzeltebilirsiniz.`);
+    state.predictedStageIndex = bestIndex;
+    state.predictionConfidence = confidence;
+    const caution = confidence < 65
+      ? " Güven skoru düşük; görüntü ve bulgular sağlık profesyoneli tarafından ayrıca değerlendirilmelidir."
+      : " Bulgularla birlikte değerlendirilmelidir.";
+    setModelResult(`${stages[bestIndex]} tahmini`, `Güven skoru: %${confidence}.${caution}`);
   } catch (error) {
     setModelResult("Tahmin alınamadı", error.message, true);
   } finally {
@@ -184,6 +191,13 @@ async function predictStage() {
 }
 
 function renderPlan() {
+  if (state.predictedStageIndex === null || $("stageSelect").value === "") {
+    setModelResult("Evre tahmini gerekli", "Bakım önerisi oluşturmak için önce yara fotoğrafından evre tahmini alın.", true);
+    $("planCard").innerHTML = `<p class="empty">Önce görüntüden evre tahmini alınmalıdır.</p>`;
+    $("guideCard").innerHTML = `<p class="empty">Tahmin sonrası ilgili rehber özeti görüntülenecek.</p>`;
+    return;
+  }
+
   const stageIndex = Number($("stageSelect").value);
   const stageName = stages[stageIndex];
   const answers = collectAnswers();
@@ -198,6 +212,7 @@ function renderPlan() {
     <p><strong>Önerilen ana bakım:</strong> ${rulePlan.ana_urun}</p>
     <p><strong>Destekleyici bakım:</strong> ${rulePlan.yardimci_urun}</p>
     <p><strong>Risk:</strong> <span class="${rulePlan.risk === "yüksek" ? "risk-high" : ""}">${rulePlan.risk}</span> · <strong>Takip:</strong> ${rulePlan.takip}</p>
+    <p><strong>Model tahmini:</strong> ${stageName} · <strong>Güven:</strong> %${state.predictionConfidence}</p>
     <h3>Bakım öncelikleri</h3>
     <ul class="note-list">${rulePlan.bakim.map((item) => `<li>${item}</li>`).join("")}</ul>
     ${rulePlan.red_flags.length ? `<h3>Dikkat edilmesi gerekenler</h3><ul class="note-list">${rulePlan.red_flags.map((item) => `<li>${item}</li>`).join("")}</ul>` : ""}
@@ -257,6 +272,9 @@ $("imageInput").addEventListener("change", () => {
   const file = $("imageInput").files[0];
   if (!file) return;
   state.uploadedFile = file;
+  state.predictedStageIndex = null;
+  state.predictionConfidence = null;
+  $("stageSelect").value = "";
   $("preview").src = URL.createObjectURL(file);
   $("preview").parentElement.classList.add("has-image");
   $("dropText").textContent = "Görüntüyü değiştir";
