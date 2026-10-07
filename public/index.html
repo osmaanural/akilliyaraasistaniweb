@@ -28,13 +28,7 @@
   </header>
 
   <main id="top">
-    <section class="notice">
-      <strong>Bilgilendirme Notu:</strong>
-      Akıllı Yara Asistanı, yara görüntüsü ve girilen bilgiler doğrultusunda ön değerlendirme ve genel bakım önerileri sunan bir destek aracıdır.
-      Tanı koymaz, tedavi belirlemez ve sağlık profesyonelinin değerlendirmesinin yerine geçmez. Şüpheli, ilerleyen veya enfeksiyon düşündüren durumlarda sağlık profesyoneli değerlendirmesi gereklidir.
-    </section>
-
-    <section class="hero">
+    <section class="hero landing-hero">
       <div class="hero-copy">
         <p class="eyebrow">Yara bakımında ön değerlendirme desteği</p>
         <h1>Yara fotoğrafını ve bulguları tek ekranda anlamlandırın.</h1>
@@ -47,35 +41,47 @@
           <span>Rehber destekli yanıt</span>
         </div>
       </div>
-      <aside class="hero-card" aria-label="Sistem akışı">
+      <aside class="hero-card led-card" aria-label="Kullanıcı seçimi">
         <div class="hero-card-top">
-          <span>AYA akışı</span>
-          <strong>3 adımda ön değerlendirme</strong>
+          <span>Başlangıç</span>
+          <strong>Size uygun ekranı seçin</strong>
         </div>
-        <ol class="flow-list">
-          <li><span>01</span><strong>Fotoğrafı yükle</strong><small>Model yara evresi için ön tahmin üretir.</small></li>
-          <li><span>02</span><strong>Bulguları gir</strong><small>Eksüda, koku, nekroz, ağrı ve risk bulguları eklenir.</small></li>
-          <li><span>03</span><strong>Bakım planını incele</strong><small>Kural tabanı ve rehber notları birlikte sunulur.</small></li>
-        </ol>
+        <div class="audience-actions">
+          <button class="audience-card" type="button" data-mode="professional">
+            <span>Sağlık çalışanıyım</span>
+            <small>Klinik bulgular, bakım önerisi ve rehber özeti</small>
+          </button>
+          <button class="audience-card" type="button" data-mode="public">
+            <span>Sağlık çalışanı değilim</span>
+            <small>Sade dilde yara bilgisi ve ne zaman yardım alınmalı?</small>
+          </button>
+        </div>
       </aside>
     </section>
 
-    <section class="info-grid" aria-label="Klinik bilgilendirme">
-      <article>
-        <strong>Uzman değerlendirmesi önemlidir</strong>
-        <p>Bu ekran ön değerlendirme sunar. Evre, doku kaybı, enfeksiyon bulgusu ve pansuman seçimi klinik gözlemle birlikte değerlendirilmelidir.</p>
-      </article>
-      <article>
-        <strong>Acil dikkat gerektiren bulgular</strong>
-        <p>Ateş, kötü koku, hızla artan kızarıklık, yoğun akıntı, nekroz veya şiddetli ağrı varsa sağlık kuruluşuna başvurulmalıdır.</p>
-      </article>
-      <article>
-        <strong>Standart takip yaklaşımı</strong>
-        <p>Basıncı azaltma, cilt bütünlüğünü koruma, nem dengesini izleme ve düzenli kayıt tutma bakım sürecinin temel parçalarıdır.</p>
-      </article>
-    </section>
+    <section id="professionalApp" class="experience-section is-hidden" aria-label="Sağlık çalışanı ekranı">
+      <section class="notice">
+        <strong>Bilgilendirme Notu:</strong>
+        Akıllı Yara Asistanı, yara görüntüsü ve girilen bilgiler doğrultusunda ön değerlendirme ve genel bakım önerileri sunan bir destek aracıdır.
+        Tanı koymaz, tedavi belirlemez ve sağlık profesyonelinin değerlendirmesinin yerine geçmez. Şüpheli, ilerleyen veya enfeksiyon düşündüren durumlarda sağlık profesyoneli değerlendirmesi gereklidir.
+      </section>
 
-    <section class="workspace" id="degerlendirme">
+      <section class="info-grid" aria-label="Klinik bilgilendirme">
+        <article>
+          <strong>Uzman değerlendirmesi önemlidir</strong>
+          <p>Bu ekran ön değerlendirme sunar. Evre, doku kaybı, enfeksiyon bulgusu ve pansuman seçimi klinik gözlemle birlikte değerlendirilmelidir.</p>
+        </article>
+        <article>
+          <strong>Acil dikkat gerektiren bulgular</strong>
+          <p>Ateş, kötü koku, hızla artan kızarıklık, yoğun akıntı, nekroz veya şiddetli ağrı varsa sağlık kuruluşuna başvurulmalıdır.</p>
+        </article>
+        <article>
+          <strong>Standart takip yaklaşımı</strong>
+          <p>Basıncı azaltma, cilt bütünlüğünü koruma, nem dengesini izleme ve düzenli kayıt tutma bakım sürecinin temel parçalarıdır.</p>
+        </article>
+      </section>
+
+      <section class="workspace" id="degerlendirme">
       <article class="panel image-panel">
         <div class="panel-head">
           <span class="step">1</span>
@@ -141,23 +147,23 @@
 
         <button id="planBtn" class="primary">Bakım Önerisi Oluştur</button>
       </article>
-    </section>
+      </section>
 
-    <section class="results" id="bakim">
+      <section class="results" id="bakim">
       <article class="panel" id="planCard">
         <p class="empty">Bakım önerisi burada görüntülenecek.</p>
       </article>
       <article class="panel" id="guideCard">
         <p class="empty">Rehber özeti burada görüntülenecek.</p>
       </article>
-    </section>
+      </section>
 
-    <section class="panel sources" id="rehber">
+      <section class="panel sources" id="rehber">
       <h2>Rehberden Kısa Notlar</h2>
       <div id="sourceList" class="source-list"></div>
-    </section>
+      </section>
 
-    <section class="chat panel">
+      <section class="chat panel">
       <div>
         <h2>Asistana Soru Sor</h2>
         <p>Bakım önerisi hakkında kısa bir soru yazın.</p>
@@ -167,6 +173,86 @@
         <input id="questionInput" placeholder="Örn. Antibiyotik gerekli mi?">
         <button id="chatBtn" type="button">Sor</button>
       </div>
+      </section>
+    </section>
+
+    <section id="publicApp" class="experience-section is-hidden" aria-label="Sağlık çalışanı olmayan kullanıcı ekranı">
+      <section class="public-intro">
+        <div>
+          <p class="eyebrow">Sade yara bilgilendirme ekranı</p>
+          <h2>Yara hakkında anlaşılır bilgi alın.</h2>
+          <p>Bu bölüm tıbbi terimler kullanmadan, yara fotoğrafı ve basit sorularla neye dikkat etmeniz gerektiğini anlatır.</p>
+        </div>
+        <strong>Tanı koymaz. Tedavi önermez. Şüpheli durumda sağlık kuruluşuna başvurun.</strong>
+      </section>
+
+      <section class="public-workspace">
+        <article class="panel image-panel">
+          <div class="panel-head">
+            <span class="step">1</span>
+            <div>
+              <h2>Yara Fotoğrafı</h2>
+              <p>Fotoğrafı yükleyin. Sistem yalnızca genel bir ön bilgi verir.</p>
+            </div>
+          </div>
+          <label class="dropzone" for="publicImageInput">
+            <input id="publicImageInput" type="file" accept="image/*">
+            <img id="publicPreview" alt="">
+            <span id="publicDropText">Görüntü yükle</span>
+          </label>
+          <button id="publicPredictBtn" class="secondary" type="button">Fotoğraftan Ön Bilgi Al</button>
+          <div id="publicModelResult" class="model-result">
+            <strong>Fotoğraf bekleniyor</strong>
+            <span>Fotoğraf yüklendiğinde anlaşılır bir ön bilgi oluşturulabilir.</span>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <span class="step">2</span>
+            <div>
+              <h2>Basit Sorular</h2>
+              <p>Varsa gördüğünüz belirtileri işaretleyin.</p>
+            </div>
+          </div>
+          <div class="public-form">
+            <label>Yaranın olduğu yer<input id="publicLocation" placeholder="topuk, kuyruk sokumu, kalça..."></label>
+            <label>Yaradan sıvı geliyor mu?<select id="publicFluid"><option>hayır</option><option>az</option><option>fazla</option></select></label>
+            <label>Kötü koku var mı?<select id="publicSmell"><option>hayır</option><option>evet</option></select></label>
+            <label>Siyah veya koyu renkli alan var mı?<select id="publicDark"><option>hayır</option><option>evet</option></select></label>
+            <label>Çevresi kızarık ya da sıcak mı?<select id="publicRedness"><option>hayır</option><option>evet</option></select></label>
+            <label>Ateş veya artan ağrı var mı?<select id="publicPainFever"><option>hayır</option><option>evet</option></select></label>
+          </div>
+          <button id="publicPlanBtn" class="primary" type="button">Anlaşılır Özet Oluştur</button>
+        </article>
+      </section>
+
+      <section class="results">
+        <article class="panel" id="publicSummaryCard">
+          <p class="empty">Özet burada görüntülenecek.</p>
+        </article>
+        <article class="panel">
+          <h2>Ne zaman yardım alınmalı?</h2>
+          <ul class="note-list">
+            <li>Yara hızla büyüyorsa veya derin görünüyorsa</li>
+            <li>Kötü koku, ateş, artan ağrı veya kızarıklık varsa</li>
+            <li>Siyah/koyu alan görüyorsanız</li>
+            <li>Şeker hastalığı veya damar sorunu varsa</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="chat panel">
+        <div>
+          <h2>AYA'ya Sade Dille Sor</h2>
+          <p>Yara hakkında merak ettiğiniz şeyi yazın. Cevaplar tanı veya tedavi yerine geçmez.</p>
+        </div>
+        <div id="publicChatLog" class="chat-log"></div>
+        <div class="chat-row">
+          <input id="publicQuestionInput" placeholder="Örn. Bu durumda doktora gitmeli miyim?">
+          <button id="publicChatBtn" type="button">Sor</button>
+        </div>
+      </section>
     </section>
 
     <section class="contact-card" id="iletisim" aria-label="İletişim">

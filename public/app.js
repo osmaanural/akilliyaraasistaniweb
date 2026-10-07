@@ -17,7 +17,12 @@ const state = {
   modelSession: null,
   uploadedFile: null,
   predictedStageIndex: null,
-  predictionConfidence: null
+  predictionConfidence: null,
+  publicUploadedFile: null,
+  publicStageIndex: null,
+  publicConfidence: null,
+  publicChatHistory: [],
+  publicSummary: null
 };
 
 function yes(value) {
@@ -94,6 +99,11 @@ function setModelResult(title, detail, isError = false) {
   $("modelResult").innerHTML = `<strong>${title}</strong><span>${detail}</span>`;
 }
 
+function setPublicModelResult(title, detail, isError = false) {
+  $("publicModelResult").classList.toggle("error", isError);
+  $("publicModelResult").innerHTML = `<strong>${title}</strong><span>${detail}</span>`;
+}
+
 async function ensureModelSession() {
   if (state.modelSession) return state.modelSession;
   if (!window.ort) {
@@ -154,6 +164,19 @@ async function imageToTensor(file) {
   return new window.ort.Tensor("float32", data, [1, 3, size, size]);
 }
 
+async function runImagePrediction(file) {
+  const session = await ensureModelSession();
+  const tensor = await imageToTensor(file);
+  const inputName = session.inputNames[0];
+  const outputName = session.outputNames[0];
+  const outputs = await session.run({ [inputName]: tensor });
+  const scores = Array.from(outputs[outputName].data);
+  const probabilities = softmax(scores);
+  const bestIndex = probabilities.reduce((best, value, index) => value > probabilities[best] ? index : best, 0);
+  const confidence = Math.round(probabilities[bestIndex] * 1000) / 10;
+  return { bestIndex, confidence };
+}
+
 async function predictStage() {
   if (!state.uploadedFile) {
     setModelResult("Görüntü bekleniyor", "Tahmin almak için önce yara fotoğrafı yükleyin.", true);
@@ -165,15 +188,7 @@ async function predictStage() {
   setModelResult("Model hazırlanıyor", "İlk tahminde model dosyası indirildiği için birkaç saniye sürebilir.");
 
   try {
-    const session = await ensureModelSession();
-    const tensor = await imageToTensor(state.uploadedFile);
-    const inputName = session.inputNames[0];
-    const outputName = session.outputNames[0];
-    const outputs = await session.run({ [inputName]: tensor });
-    const scores = Array.from(outputs[outputName].data);
-    const probabilities = softmax(scores);
-    const bestIndex = probabilities.reduce((best, value, index) => value > probabilities[best] ? index : best, 0);
-    const confidence = Math.round(probabilities[bestIndex] * 1000) / 10;
+    const { bestIndex, confidence } = await runImagePrediction(state.uploadedFile);
 
     $("stageSelect").value = String(bestIndex);
     state.predictedStageIndex = bestIndex;
@@ -181,13 +196,100 @@ async function predictStage() {
     const caution = confidence < 65
       ? " Güven skoru düşük; görüntü ve bulgular sağlık profesyoneli tarafından ayrıca değerlendirilmelidir."
       : " Bulgularla birlikte değerlendirilmelidir.";
-    setModelResult(`${stages[bestIndex]} tahmini`, `Güven skoru: %${confidence}.${caution}`);
+    setModelResult(`Tahmin Edilen Evre: ${stages[bestIndex]}`, `Güven skoru: %${confidence}.${caution}`);
   } catch (error) {
     setModelResult("Tahmin alınamadı", error.message, true);
   } finally {
     $("predictBtn").disabled = false;
     $("predictBtn").textContent = "Görüntüden Evre Tahmin Et";
   }
+}
+
+async function predictPublicStage() {
+  if (!state.publicUploadedFile) {
+    setPublicModelResult("Fotoğraf bekleniyor", "Ön bilgi almak için önce yara fotoğrafı yükleyin.", true);
+    return;
+  }
+
+  $("publicPredictBtn").disabled = true;
+  $("publicPredictBtn").textContent = "Fotoğraf inceleniyor...";
+  setPublicModelResult("Hazırlanıyor", "İlk kullanımda model dosyası indirildiği için birkaç saniye sürebilir.");
+
+  try {
+    const { bestIndex, confidence } = await runImagePrediction(state.publicUploadedFile);
+    state.publicStageIndex = bestIndex;
+    state.publicConfidence = confidence;
+    const simpleStage = `Evre ${bestIndex + 1}`;
+    const warning = confidence < 65
+      ? " Fotoğraf sonucu çok net değil; bir sağlık çalışanının görmesi daha doğru olur."
+      : " Bu sonuç kesin karar değildir.";
+    setPublicModelResult(`Tahmin Edilen Evre: ${simpleStage}`, `Tahmin netliği: %${confidence}.${warning}`);
+  } catch (error) {
+    setPublicModelResult("Ön bilgi alınamadı", error.message, true);
+  } finally {
+    $("publicPredictBtn").disabled = false;
+    $("publicPredictBtn").textContent = "Fotoğraftan Ön Bilgi Al";
+  }
+}
+
+function publicYes(id) {
+  return ["evet", "fazla"].includes(String($(id).value).toLowerCase());
+}
+
+function renderPublicSummary() {
+  const warnings = [];
+  const recommendations = [
+    "Yara üzerine baskı gelmesini azaltın.",
+    "Yarayı temiz ve kuru tutmaya çalışın.",
+    "Yarayı kendi başınıza kesmeyin, kazımayın veya derinlemesine temizlemeye çalışmayın.",
+  ];
+
+  if (publicYes("publicSmell")) warnings.push("Kötü koku fark ediyorsanız sağlık kuruluşuna başvurmanız önerilir.");
+  if (publicYes("publicDark")) warnings.push("Siyah veya koyu alan varsa yara daha dikkatli değerlendirilmelidir.");
+  if (publicYes("publicRedness")) warnings.push("Çevrede kızarıklık veya sıcaklık artışı varsa iltihap belirtisi olabilir.");
+  if (publicYes("publicPainFever")) warnings.push("Ateş veya artan ağrı varsa gecikmeden yardım alınmalıdır.");
+  if ($("publicFluid").value === "fazla") warnings.push("Fazla sıvı gelmesi yaranın yakından izlenmesini gerektirir.");
+
+  const location = $("publicLocation").value.trim() || "belirtilmeyen bölge";
+  const stageText = state.publicStageIndex === null
+    ? "Fotoğraf sonucu alınmadı."
+    : `Fotoğrafa göre yara Evre ${state.publicStageIndex + 1} görünümüne benzer olabilir. Tahmin netliği: %${state.publicConfidence}.`;
+
+  state.publicSummary = {
+    location,
+    stageText,
+    warnings,
+    recommendations,
+    answers: {
+      "yaranın olduğu yer": location,
+      "yaradan sıvı geliyor mu": $("publicFluid").value,
+      "kötü koku var mı": $("publicSmell").value,
+      "siyah veya koyu alan var mı": $("publicDark").value,
+      "çevresi kızarık ya da sıcak mı": $("publicRedness").value,
+      "ateş veya artan ağrı var mı": $("publicPainFever").value,
+    }
+  };
+
+  $("publicSummaryCard").innerHTML = `
+    <h2>Sade Özet</h2>
+    <p><strong>Yara yeri:</strong> ${location}</p>
+    <p><strong>Fotoğraf bilgisi:</strong> ${stageText}</p>
+    <h3>Dikkat etmeniz gerekenler</h3>
+    <ul class="note-list">${(warnings.length ? warnings : ["Şu an belirgin acil uyarı işaretlenmedi. Yine de yara takip edilmeli ve kötüleşirse yardım alınmalıdır."]).map((item) => `<li>${item}</li>`).join("")}</ul>
+    <h3>Genel öneriler</h3>
+    <ul class="note-list">${recommendations.map((item) => `<li>${item}</li>`).join("")}</ul>
+    <p class="subtle">Bu özet tanı veya tedavi değildir. Yara derinse, kötüleşiyorsa ya da emin değilseniz sağlık profesyoneline danışın.</p>
+`;
+}
+
+function selectAudience(mode) {
+  $("professionalApp").classList.toggle("is-hidden", mode !== "professional");
+  $("publicApp").classList.toggle("is-hidden", mode !== "public");
+  document.querySelectorAll(".audience-card").forEach((button) => {
+    button.classList.toggle("is-selected", button.dataset.mode === mode);
+  });
+  const target = mode === "professional" ? $("professionalApp") : $("publicApp");
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function renderPlan() {
@@ -236,6 +338,14 @@ function addMessage(role, content, isError = false) {
   $("chatLog").scrollTop = $("chatLog").scrollHeight;
 }
 
+function addPublicMessage(role, content, isError = false) {
+  const bubble = document.createElement("div");
+  bubble.className = `bubble ${isError ? "error" : role}`;
+  bubble.textContent = content;
+  $("publicChatLog").appendChild(bubble);
+  $("publicChatLog").scrollTop = $("publicChatLog").scrollHeight;
+}
+
 async function askAya() {
   if (!state.rulePlan) {
     addMessage("assistant", "Önce bakım önerisi oluşturun.", true);
@@ -268,6 +378,58 @@ async function askAya() {
   }
 }
 
+async function askPublicAya() {
+  const question = $("publicQuestionInput").value.trim();
+  if (!question) return;
+  $("publicQuestionInput").value = "";
+  addPublicMessage("user", question);
+
+  const location = $("publicLocation").value.trim() || "belirtilmedi";
+  const publicAnswers = {
+    "yaranın olduğu yer": location,
+    "yaradan sıvı geliyor mu": $("publicFluid").value,
+    "kötü koku var mı": $("publicSmell").value,
+    "siyah veya koyu alan var mı": $("publicDark").value,
+    "çevresi kızarık ya da sıcak mı": $("publicRedness").value,
+    "ateş veya artan ağrı var mı": $("publicPainFever").value,
+  };
+  const publicStageText = state.publicStageIndex === null
+    ? "fotoğraf tahmini alınmadı"
+    : `Evre ${state.publicStageIndex + 1} görünümüne benzer, tahmin netliği %${state.publicConfidence}`;
+  const publicWarnings = state.publicSummary?.warnings || [];
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        audience: "public",
+        question,
+        publicStageText,
+        stageName: state.publicStageIndex === null ? "belirtilmedi" : stages[state.publicStageIndex],
+        answers: publicAnswers,
+        rulePlan: {
+          summary: state.publicSummary || null,
+          warningSigns: publicWarnings,
+        },
+        ragContext: [
+          {
+            title: "Sade yara bakım uyarıları",
+            content: "Kötü koku, ateş, artan kızarıklık/sıcaklık, fazla sıvı, siyah veya koyu alan, artan ağrı ve yaranın büyümesi durumunda sağlık kuruluşuna başvurulmalıdır."
+          }
+        ],
+        history: state.publicChatHistory
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : JSON.stringify(data.error));
+    addPublicMessage("assistant", data.answer);
+    state.publicChatHistory.push({ role: "user", content: question }, { role: "assistant", content: data.answer });
+  } catch (error) {
+    addPublicMessage("assistant", `Yanıt alınamadı: ${error.message}`, true);
+  }
+}
+
 $("imageInput").addEventListener("change", () => {
   const file = $("imageInput").files[0];
   if (!file) return;
@@ -281,9 +443,31 @@ $("imageInput").addEventListener("change", () => {
   setModelResult("Görüntü hazır", "Tahmin almak için model butonuna basın.");
 });
 
+document.querySelectorAll(".audience-card").forEach((button) => {
+  button.addEventListener("click", () => selectAudience(button.dataset.mode));
+});
+
+$("publicImageInput").addEventListener("change", () => {
+  const file = $("publicImageInput").files[0];
+  if (!file) return;
+  state.publicUploadedFile = file;
+  state.publicStageIndex = null;
+  state.publicConfidence = null;
+  $("publicPreview").src = URL.createObjectURL(file);
+  $("publicPreview").parentElement.classList.add("has-image");
+  $("publicDropText").textContent = "Görüntüyü değiştir";
+  setPublicModelResult("Fotoğraf hazır", "Ön bilgi almak için butona basın.");
+});
+
 $("planBtn").addEventListener("click", renderPlan);
 $("predictBtn").addEventListener("click", predictStage);
+$("publicPredictBtn").addEventListener("click", predictPublicStage);
+$("publicPlanBtn").addEventListener("click", renderPublicSummary);
+$("publicChatBtn").addEventListener("click", askPublicAya);
 $("chatBtn").addEventListener("click", askAya);
 $("questionInput").addEventListener("keydown", (event) => {
   if (event.key === "Enter") askAya();
+});
+$("publicQuestionInput").addEventListener("keydown", (event) => {
+  if (event.key === "Enter") askPublicAya();
 });
